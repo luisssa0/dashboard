@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STEAM DEALS PULSE — скидки и отзывы (live API)</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07060f;--card:#100e20;--line:#2a2650;--txt:#e8e6ff;--mut:#8f8bb8;--c1:#00f0ff;--c2:#ff2bd6;--c3:#b6ff3b;--warn:#ffd23b;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(900px 500px at 15% -10%,#2a0f4a55,transparent),radial-gradient(800px 500px at 100% 0,#00f0ff18,transparent),var(--bg);color:var(--txt);font-family:Rajdhani,system-ui,sans-serif;font-size:17px}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 40px}
+h1{font:800 clamp(24px,5vw,42px)/1.1 Orbitron,system-ui,sans-serif;margin:0;letter-spacing:2px;color:var(--c1);text-shadow:0 0 18px #00f0ff88,0 0 40px #ff2bd655}
+h1 span{color:var(--c2)}
+h2{font:600 15px Orbitron,system-ui,sans-serif;letter-spacing:1.5px;margin:0 0 14px;color:var(--c3);text-transform:uppercase}
+.sub{color:var(--mut);margin:8px 0 16px}
+.grid{display:grid;gap:14px;margin-bottom:14px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.two{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{background:linear-gradient(160deg,#141128,var(--card));border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 8px 30px #0008;min-width:0}
+.kpi b{display:block;font:800 clamp(20px,4vw,28px) Orbitron,sans-serif;color:var(--c1);text-shadow:0 0 12px #00f0ff77;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kpi:nth-child(2) b{color:var(--c2);text-shadow:0 0 12px #ff2bd677}
+.kpi:nth-child(3) b{color:var(--c3);text-shadow:0 0 12px #b6ff3b66}
+.kpi:nth-child(4) b{color:var(--warn);text-shadow:0 0 12px #ffd23b66}
+.kpi small,.sub small{color:var(--mut)}
+.ctl{display:flex;flex-wrap:wrap;gap:14px;align-items:end}
+.ctl label{display:flex;flex-direction:column;gap:4px;color:var(--mut);font-size:14px}
+select,button{font:600 15px Rajdhani,sans-serif;color:var(--txt);background:#1a1736;border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+button{cursor:pointer}button:hover,select:hover{border-color:var(--c1)}
+input[type=range]{accent-color:var(--c1)}
+.st{font:600 12px Orbitron,sans-serif;letter-spacing:1px;color:var(--warn);margin:12px 0 0}
+.st.ok{color:var(--c3)}.st.err{color:var(--c2)}
+.row{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:center;margin:8px 0}
+.row .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+.bar{height:22px;background:#0b0a18;border-radius:6px;position:relative;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--c2),var(--c1));box-shadow:0 0 14px #00f0ff77;transition:width .5s}
+.bar em{position:absolute;right:8px;top:0;line-height:22px;font:600 13px Rajdhani;font-style:normal}
+.rc{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.rcard{display:flex;gap:10px;border:1px solid var(--line);border-left:3px solid var(--col);border-radius:12px;padding:10px;background:#0d0b1c;color:inherit;text-decoration:none}
+.rcard:hover{box-shadow:0 0 16px var(--col)}
+.rcard img{width:92px;height:43px;object-fit:cover;border-radius:6px;background:#1a1736;flex:none}
+.rcard h3{margin:0 0 4px;font:600 15px Rajdhani,sans-serif;line-height:1.2}
+.pct{font:800 22px Orbitron,sans-serif;color:var(--col);text-shadow:0 0 10px var(--col)}
+.lbl{font-weight:600;color:var(--col);margin-left:6px;font-size:14px}
+.sp{height:6px;border-radius:3px;overflow:hidden;background:#2a2650;margin:6px 0 4px}.sp i{display:block;height:100%;background:var(--col)}
+.rcard small{color:var(--mut)}.rcard s{color:var(--mut)}
+svg{width:100%;height:auto;display:block}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:600px;font-size:15px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--c1);cursor:pointer;font:600 12px Orbitron,sans-serif;white-space:nowrap}
+tr:hover td{background:#00f0ff0d}
+.src{color:var(--mut);font-size:14px;margin-top:18px;line-height:1.5}
+@media(max-width:520px){.row{grid-template-columns:100px 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>STEAM DEALS <span>PULSE</span></h1>
+<p class="sub">Скидки в Steam и отзывы игроков. Данные загружаются из публичного API CheapShark при каждом открытии страницы и по кнопке.</p>
+
+<div class="card" style="margin-bottom:14px">
+<div class="ctl">
+<label>Сортировка<select id="sort"><option value="Deal Rating">Лучшая сделка</option><option value="Savings">Размер скидки</option><option value="Reviews">Число отзывов</option><option value="Metacritic">Metacritic</option><option value="Price">Цена (дешевле)</option></select></label>
+<label>Мин. рейтинг Steam: <b id="minv">70</b>%<input type="range" id="minr" min="0" max="95" step="5" value="70"></label>
+<label>Макс. цена: $<b id="maxv">30</b><input type="range" id="maxp" min="5" max="60" step="5" value="30"></label>
+<label>Автообновление<select id="auto"><option value="0">выкл</option><option value="60">каждую минуту</option><option value="300">каждые 5 минут</option></select></label>
+<button id="go">⟳ Обновить</button>
+</div>
+<div class="st" id="st">Загрузка…</div>
+</div>
+
+<div class="grid kpis">
+<div class="card kpi"><small>Игр в выборке</small><b id="k1">—</b><small>со скидкой в Steam</small></div>
+<div class="card kpi"><small>Средняя скидка</small><b id="k2">—</b><small>от обычной цены</small></div>
+<div class="card kpi"><small>Средний рейтинг Steam</small><b id="k3">—</b><small>положительных отзывов</small></div>
+<div class="card kpi"><small>Отзывов суммарно</small><b id="k4">—</b><small>у игр выборки</small></div>
+</div>
+
+<div class="card" style="margin-bottom:14px"><h2>Отзывы игроков Steam</h2><div class="rc" id="rc"></div></div>
+
+<div class="grid two">
+<div class="card"><h2>Топ-10 по размеру скидки</h2><div id="bars"></div></div>
+<div class="card"><h2>Цена vs оценка игроков</h2><div id="sc"></div></div>
+</div>
+<div class="grid two">
+<div class="card"><h2>Распределение оценок Steam</h2><div id="dist"></div></div>
+<div class="card"><h2>Metacritic vs Steam</h2><div id="mc"></div></div>
+</div>
+
+<div class="card"><h2>Все игры из выборки</h2><div class="tw"><table id="tbl"></table></div></div>
+<p class="src">Источник: CheapShark API (https://www.cheapshark.com/api/1.0/deals, магазин Steam). Цены в USD. Отзывы — процент положительных оценок Steam и их количество; Metacritic показан, если есть. Если данные не загрузились, проверь интернет и открой файл в обычном браузере.</p>
+</div>
+
+<script>
+const API="https://www.cheapshark.com/api/1.0/deals";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>Math.round(n).toLocaleString("ru-RU");
+const RU={"Overwhelmingly Positive":"Крайне положительные","Very Positive":"Очень положительные","Positive":"Положительные","Mostly Positive":"В основном положительные","Mixed":"Смешанные","Mostly Negative":"В основном отрицательные","Negative":"Отрицательные","Very Negative":"Очень отрицательные","Overwhelmingly Negative":"Крайне отрицательные"};
+const col=p=>p>=95?"#b6ff3b":p>=80?"#00f0ff":p>=70?"#7aa2ff":p>=40?"#ffd23b":"#ff2bd6";
+let D=[],sk="cnt",dir=-1,timer=null,deb=null;
+
+async function load(){
+  const st=$("st");st.className="st";st.textContent="Загрузка данных из CheapShark API…";
+  const s=$("sort").value;
+  const q=new URLSearchParams({storeID:"1",onSale:"1",pageSize:"60",sortBy:s,desc:s==="Price"?"0":"1",steamRating:$("minr").value,upperPrice:$("maxp").value});
+  try{
+    const r=await fetch(API+"?"+q);
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const j=await r.json();
+    if(!Array.isArray(j))throw new Error("неожиданный ответ API");
+    D=j.map(x=>({id:x.dealID,t:x.title,sale:+x.salePrice,norm:+x.normalPrice,sv:Math.round(+x.savings),pos:+x.steamRatingPercent,cnt:+x.steamRatingCount,txt:x.steamRatingText||"",mc:+x.metacriticScore,th:x.thumb||""})).filter(d=>d.cnt>0&&d.pos>0);
+    if(!D.length){st.className="st err";st.textContent="По этим фильтрам ничего не найдено — ослабь ограничения.";render();return}
+    render();
+    st.className="st ok";st.textContent="● LIVE · обновлено "+new Date().toLocaleTimeString("ru-RU")+" · cheapshark.com";
+  }catch(e){
+    st.className="st err";st.textContent="Не удалось загрузить данные ("+e.message+"). Нажми «Обновить».";
+  }
+}
+
+function render(){
+  const n=D.length,avg=a=>a.reduce((x,y)=>x+y,0)/(a.length||1);
+  $("k1").textContent=n;
+  $("k2").textContent=n?Math.round(avg(D.map(d=>d.sv)))+"%":"—";
+  $("k3").textContent=n?Math.round(avg(D.map(d=>d.pos)))+"%":"—";
+  $("k4").textContent=n?(D.reduce((a,d)=>a+d.cnt,0)/1e6).toFixed(1).replace(".",",")+" млн":"—";
+  cards();bars();scat();dist();mcs();tbl();
+}
+
+function cards(){
+  $("rc").innerHTML=D.slice(0,12).map(d=>{const c=col(d.pos),img=d.th.startsWith("https://")?`<img src="${esc(d.th)}" alt="" loading="lazy">`:"";
+  return `<a class="rcard" style="--col:${c}" href="https://www.cheapshark.com/redirect?dealID=${encodeURIComponent(d.id)}" target="_blank" rel="noopener">${img}<div><h3>${esc(d.t)}</h3><span class="pct">${d.pos}%</span><span class="lbl">${esc(RU[d.txt]||d.txt)}</span><div class="sp"><i style="width:${d.pos}%"></i></div><small>${fmt(d.cnt)} отзывов · <s>$${d.norm.toFixed(2)}</s> <b style="color:var(--c3)">$${d.sale.toFixed(2)}</b> (−${d.sv}%)</small></div></a>`}).join("");
+}
+
+function bars(){
+  const s=[...D].sort((a,b)=>b.sv-a.sv).slice(0,10);
+  $("bars").innerHTML=s.map(d=>`<div class="row"><span class="n" title="${esc(d.t)}">${esc(d.t)}</span><div class="bar"><i style="width:${d.sv}%"></i><em>−${d.sv}% · $${d.sale.toFixed(2)}</em></div></div>`).join("");
+}
+
+function axes(W,H,p,xmin,xmax,ymin,ymax,xl,yl){
+  let s=`<svg viewBox="0 0 ${W} ${H}">`;
+  const x=v=>p+(v-xmin)/(xmax-xmin||1)*(W-p-14),y=v=>H-p-(v-ymin)/(ymax-ymin||1)*(H-p-14);
+  for(let i=0;i<=4;i++){const v=ymin+(ymax-ymin)*i/4;s+=`<line x1="${p}" x2="${W-14}" y1="${y(v)}" y2="${y(v)}" stroke="#2a2650"/><text x="${p-6}" y="${y(v)+4}" fill="#8f8bb8" font-size="11" text-anchor="end">${Math.round(v)}</text>`}
+  for(let i=0;i<=4;i++){const v=xmin+(xmax-xmin)*i/4;s+=`<text x="${x(v)}" y="${H-p+18}" fill="#8f8bb8" font-size="11" text-anchor="middle">${Math.round(v)}</text>`}
+  s+=`<text x="${W/2}" y="${H-4}" fill="#8f8bb8" font-size="12" text-anchor="middle">${xl}</text><text x="12" y="14" fill="#8f8bb8" font-size="12">${yl}</text>`;
+  return {s,x,y};
+}
+function scat(){
+  const W=520,H=300,p=44,ymin=Math.max(0,Math.floor(Math.min(...D.map(d=>d.pos))/10)*10-5),ymax=100,xmax=Math.max(...D.map(d=>d.sale))*1.05||10;
+  const a=axes(W,H,p,0,xmax,ymin,ymax,"цена со скидкой, $","% положительных");
+  $("sc").innerHTML=a.s+D.map(d=>{const c=col(d.pos);return `<circle cx="${a.x(d.sale)}" cy="${a.y(d.pos)}" r="${3+Math.log10(d.cnt+1)*1.6}" fill="${c}" fill-opacity=".3" stroke="${c}" stroke-width="1.5"><title>${esc(d.t)}: $${d.sale.toFixed(2)}, ${d.pos}%, ${fmt(d.cnt)} отзывов</title></circle>`}).join("")+"</svg>";
+}
+function mcs(){
+  const M=D.filter(d=>d.mc>0);
+  if(!M.length){$("mc").innerHTML='<p class="sub">Нет игр с оценкой Metacritic в этой выборке.</p>';return}
+  const W=520,H=300,p=44,a=axes(W,H,p,Math.max(0,Math.floor(Math.min(...M.map(d=>d.mc))/10)*10-5),100,Math.max(0,Math.floor(Math.min(...M.map(d=>d.pos))/10)*10-5),100,"Metacritic","Steam, %");
+  $("mc").innerHTML=a.s+M.map(d=>`<circle cx="${a.x(d.mc)}" cy="${a.y(d.pos)}" r="5" fill="#ff2bd6" fill-opacity=".35" stroke="#ff2bd6" stroke-width="1.5"><title>${esc(d.t)}: Metacritic ${d.mc}, Steam ${d.pos}%</title></circle>`).join("")+"</svg>";
+}
+function dist(){
+  const m={};D.forEach(d=>{const k=RU[d.txt]||d.txt||"Без оценки";m[k]=(m[k]||0)+1});
+  const e=Object.entries(m).sort((a,b)=>b[1]-a[1]),mx=e[0][1];
+  $("dist").innerHTML=e.map(([k,v])=>`<div class="row"><span class="n">${esc(k)}</span><div class="bar"><i style="width:${v/mx*100}%"></i><em>${v}</em></div></div>`).join("");
+}
+
+const C=[["t","Игра"],["sale","Цена $"],["norm","Была $"],["sv","Скидка"],["pos","Steam %"],["cnt","Отзывов"],["mc","Metacritic"]];
+function tbl(){
+  const s=[...D].sort((a,b)=>(typeof a[sk]==="string"?a[sk].localeCompare(b[sk]):a[sk]-b[sk])*dir);
+  $("tbl").innerHTML="<tr>"+C.map(c=>`<th data-k="${c[0]}">${c[1]}${c[0]===sk?(dir>0?" ▲":" ▼"):""}</th>`).join("")+"</tr>"+
+  s.map(d=>`<tr><td><a style="color:inherit" href="https://www.cheapshark.com/redirect?dealID=${encodeURIComponent(d.id)}" target="_blank" rel="noopener">${esc(d.t)}</a></td><td>${d.sale.toFixed(2)}</td><td>${d.norm.toFixed(2)}</td><td>−${d.sv}%</td><td style="color:${col(d.pos)}">${d.pos}%</td><td>${fmt(d.cnt)}</td><td>${d.mc>0?d.mc:"—"}</td></tr>`).join("");
+  $("tbl").querySelectorAll("th").forEach(h=>h.onclick=()=>{const k=h.dataset.k;dir=k===sk?-dir:(k==="t"?1:-1);sk=k;tbl()});
+}
+
+function later(){clearTimeout(deb);deb=setTimeout(load,500)}
+$("sort").onchange=load;$("go").onclick=load;
+$("minr").oninput=()=>{$("minv").textContent=$("minr").value;later()};
+$("maxp").oninput=()=>{$("maxv").textContent=$("maxp").value;later()};
+$("auto").onchange=()=>{clearInterval(timer);const s=+$("auto").value;if(s)timer=setInterval(load,s*1000)};
+load();
+</script>
+</body>
+</html>
